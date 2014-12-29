@@ -1,17 +1,9 @@
 class Lisp::Parser
 macro
-  BLANK     [\ \t]+
-  DIGIT     \d+
-  ADD       \+
-  SUBTRACT  \-
-  MULTIPLY  \*
-  DIVIDE    \/
+  DIGITS    \d+
+  DOT       \.
 
 rule
-  {BLANK}      # no action
-  {DIGIT}      { [:DIGIT, text] }
-  {ADD}        { [:ADD, text] }
-  {SUBTRACT}   { [:SUBTRACT, text] }
-  {MULTIPLY}   { [:MULTIPLY, text] }
-  {DIVIDE}     { [:DIVIDE, text] }
+  {DIGITS}      { [:DIGITS, text] }
+  {DOT}         { [:DOT, text] }
 end
