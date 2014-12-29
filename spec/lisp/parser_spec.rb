@@ -37,6 +37,33 @@ RSpec.describe Lisp::Parser do
       expect(result.value).to eq('001')
     end
 
+    it 'parses an integer with a leading positive sign' do
+      result = parse_string('+1')
+
+      expect(result).to be_a(Lisp::AST::Integer)
+      expect(result.value).to eq('1')
+      expect(result.positive?).to be(true)
+      expect(result.signed?).to be(true)
+    end
+
+    it 'parses an integer with a leading negative sign' do
+      result = parse_string('-1')
+
+      expect(result).to be_a(Lisp::AST::Integer)
+      expect(result.value).to eq('1')
+      expect(result.positive?).to be(false)
+      expect(result.signed?).to be(true)
+    end
+
+    it 'parses an integer without a sign as positive' do
+      result = parse_string('1')
+
+      expect(result).to be_a(Lisp::AST::Integer)
+      expect(result.value).to eq('1')
+      expect(result.positive?).to be(true)
+      expect(result.signed?).to be(false)
+    end
+
   end
 
   context 'floats' do
@@ -79,6 +106,30 @@ RSpec.describe Lisp::Parser do
       expect(result).to be_a(Lisp::AST::Float)
       expect(result.integer_part).to eq('1')
       expect(result.decimal_part).to eq('152000')
+    end
+
+    it 'parses a float with a leading positive sign' do
+      result = parse_string('+1.0')
+
+      expect(result).to be_a(Lisp::AST::Float)
+      expect(result.positive?).to be(true)
+      expect(result.signed?).to be(true)
+    end
+
+    it 'parses a float with a leading negative sign' do
+      result = parse_string('-1.0')
+
+      expect(result).to be_a(Lisp::AST::Float)
+      expect(result.positive?).to be(false)
+      expect(result.signed?).to be(true)
+    end
+
+    it 'parses a float without a leading sign as positive' do
+      result = parse_string('1.0')
+
+      expect(result).to be_a(Lisp::AST::Float)
+      expect(result.positive?).to be(true)
+      expect(result.signed?).to be(false)
     end
 
   end
