@@ -1,13 +1,7 @@
 class Lisp::Parser
 macro
-  DIGIT \d
-  DOT \.
-  SIGN \+|\-
-  EXPONENT e|E
+  ANYTHING .
 
 rule
-  {DIGIT} { [:DIGIT, text] }
-  {DOT} { [text, text] }
-  {EXPONENT} { [:EXPONENT, text] }
-  {SIGN} { [text, text] }
+  {ANYTHING} { [text, text] }
 end
