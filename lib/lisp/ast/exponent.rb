@@ -1,10 +1,10 @@
 module Lisp
   module AST
-    class Integer
-
-      attr_reader :sign, :value
+    class Exponent
+      attr_reader :label, :sign, :value
 
       def initialize(options)
+        @label = options[:label]
         @sign = options[:sign]
         @value = options[:value]
         @options = options

@@ -1,34 +1,36 @@
 class Lisp::Parser
 rule
-  expression
-    :
-        integer
-      | float
+  expression:
+      integer
+    | float
 
-  integer : unsigned_integer | signed_integer
+  integer:
+      digits { return Lisp::AST::Integer.new(value: val[0]) }
+    | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
 
-  unsigned_integer
-    : DIGITS { return Lisp::AST::Integer.from_value(val[0]) }
+  float:
+      integer decimal { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1]) }
+    | integer decimal exponent { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1], exponent_label: val[2].label, exponent_sign: val[2].sign, exponent_part: val[2].value) }
 
-  signed_integer
-    :
-        PLUS unsigned_integer { return val[1].with_positive_sign }
-      | MINUS unsigned_integer { return val[1].with_negative_sign }
+  decimal: point digits { return val[1] }
 
-  float : unsigned_float | signed_float
+  exponent:
+      EXPONENT digits { return Lisp::AST::Exponent.new(label: val[0], value: val[1]) }
+    | EXPONENT sign digits { return Lisp::AST::Exponent.new(label: val[0], sign: val[1], value: val[2]) }
 
-  unsigned_float
-    : DIGITS DOT DIGITS { return Lisp::AST::Float.from_integer_and_decimal(val[0], val[2]) }
+  digits:
+      DIGIT
+    | DIGIT digits { return val.join('') }
 
-  signed_float
-    :
-        PLUS unsigned_float { return val[1].with_positive_sign }
-      | MINUS unsigned_float { return val[1].with_negative_sign }
+  sign: '+' | '-'
+
+  point: '.'
 end
 
 ---- header
   require 'lisp/ast/integer'
   require 'lisp/ast/float'
+  require 'lisp/ast/exponent'
 
 ---- inner
   def parse_string(string)
