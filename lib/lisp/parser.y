@@ -4,6 +4,7 @@ rule
       boolean
     | float
     | integer
+    | keyword
     | string
     | symbol
 
@@ -16,6 +17,8 @@ rule
   integer:
       digits { return Lisp::AST::Integer.new(value: val[0]) }
     | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
+
+  keyword: ':' trailing_symbol_characters { return Lisp::AST::Keyword.new(value: ":#{val[1]}") }
 
   string: STRING { return Lisp::AST::String.new(value: val[0][1..-2]) }
 
@@ -63,12 +66,13 @@ rule
 end
 
 ---- header
-  require 'lisp/ast/integer'
-  require 'lisp/ast/float'
-  require 'lisp/ast/exponent'
-  require 'lisp/ast/symbol'
-  require 'lisp/ast/string'
   require 'lisp/ast/boolean'
+  require 'lisp/ast/exponent'
+  require 'lisp/ast/float'
+  require 'lisp/ast/integer'
+  require 'lisp/ast/keyword'
+  require 'lisp/ast/string'
+  require 'lisp/ast/symbol'
 
 ---- inner
   def parse_string(string)

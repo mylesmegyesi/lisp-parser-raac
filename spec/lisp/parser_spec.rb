@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'lisp/parser'
 
 RSpec.describe Lisp::Parser do
+  VALID_STARTING_SYMBOL_CHARACTERS = ('a'..'z').to_a + ('A'..'Z').to_a + %w(/ * ! _ ? $ % & = < >).to_a
+  VALID_TRAILING_SYMBOL_CHARACTERS = VALID_STARTING_SYMBOL_CHARACTERS + (0..9).map(&:to_s) + %w(+ - . : #).to_a
 
   def parse_string(string)
     described_class.new.parse_string(string)
@@ -205,12 +207,9 @@ RSpec.describe Lisp::Parser do
   end
 
   describe 'parsing symbols' do
-    valid_starting_characters = ('a'..'z').to_a + ('A'..'Z').to_a + %w(/ * ! _ ? $ % & = < >).to_a
-    valid_trailing_characters = valid_starting_characters + (0..9).map(&:to_s) + %w(+ - . : #).to_a
-
     describe 'what the first character of a symbol can be' do
-      specify "symbols can start with #{valid_starting_characters.join(' ')}" do
-        valid_starting_characters.each do |valid_starting_character|
+      specify "symbols can start with #{VALID_STARTING_SYMBOL_CHARACTERS.join(' ')}" do
+        VALID_STARTING_SYMBOL_CHARACTERS.each do |valid_starting_character|
           symbol = "#{valid_starting_character}abc"
           result = parse_string(symbol)
 
@@ -220,7 +219,7 @@ RSpec.describe Lisp::Parser do
       end
 
       specify 'any valid starting character is also parsed as a symbol when no trailing characters are provided' do
-        valid_starting_characters.each do |valid_starting_character|
+        VALID_STARTING_SYMBOL_CHARACTERS.each do |valid_starting_character|
           result = parse_string(valid_starting_character)
 
           expect(result).to be_a(Lisp::AST::Symbol)
@@ -266,8 +265,8 @@ RSpec.describe Lisp::Parser do
     end
 
     describe 'what the trailing (after the first) characters in a symbol can be' do
-      specify "symbols can include #{valid_trailing_characters.join(' ')}" do
-        valid_trailing_characters.each do |valid_trailing_character|
+      specify "symbols can include #{VALID_TRAILING_SYMBOL_CHARACTERS.join(' ')}" do
+        VALID_TRAILING_SYMBOL_CHARACTERS.each do |valid_trailing_character|
           symbol = "a#{valid_trailing_character}"
           result = parse_string(symbol)
 
@@ -277,8 +276,8 @@ RSpec.describe Lisp::Parser do
       end
 
       specify 'any valid starting symbol can be paired with any valid trailing symbol' do
-        valid_starting_characters.each do |valid_starting_character|
-          valid_trailing_characters.each do |valid_trailing_character|
+        VALID_STARTING_SYMBOL_CHARACTERS.each do |valid_starting_character|
+          VALID_TRAILING_SYMBOL_CHARACTERS.each do |valid_trailing_character|
             symbol = valid_starting_character + valid_trailing_character
             result = parse_string(symbol)
 
@@ -322,4 +321,23 @@ RSpec.describe Lisp::Parser do
     end
   end
 
+  describe 'parsing keywords' do
+    specify 'keywords start with colon (:)' do
+      keyword = ':abc'
+      result = parse_string(keyword)
+
+      expect(result).to be_a(Lisp::AST::Keyword)
+      expect(result.value).to eq(keyword)
+    end
+
+    specify 'keywords can include any valid symbol character' do
+      VALID_TRAILING_SYMBOL_CHARACTERS.each do |valid_symbol_character|
+        keyword = ":#{valid_symbol_character}#{valid_symbol_character}"
+        result = parse_string(keyword)
+
+        expect(result).to be_a(Lisp::AST::Keyword)
+        expect(result.value).to eq(keyword)
+      end
+    end
+  end
 end
