@@ -3,13 +3,26 @@ rule
   expression:
       integer
     | float
+    | string
     | symbol
+
+  integer:
+      digits { return Lisp::AST::Integer.new(value: val[0]) }
+    | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
+
+  float:
+      integer decimal { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1]) }
+    | integer decimal exponent { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1], exponent_label: val[2].label, exponent_sign: val[2].sign, exponent_part: val[2].value) }
+
+  string: STRING { return Lisp::AST::String.new(value: val[0][1..-2]) }
 
   symbol:
       leading_symbol_character { return Lisp::AST::Symbol.new(value: val[0]) }
     | leading_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
     | digit_prefix non_digit_trailing_symbol_character { return Lisp::AST::Symbol.new(value: val.join('')) }
     | digit_prefix non_digit_trailing_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
+
+  # fragments
 
   digit_prefix: sign | point
 
@@ -22,14 +35,6 @@ rule
   non_digit_trailing_symbol_character: leading_symbol_character | '+' | '-' | '.' | ':' | '#'
 
   leading_symbol_character: alpha | '*' | '!' | '_' | '?' | '$' | '%' | '&' | '=' | '<' | '>' | '/'
-
-  integer:
-      digits { return Lisp::AST::Integer.new(value: val[0]) }
-    | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
-
-  float:
-      integer decimal { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1]) }
-    | integer decimal exponent { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1], exponent_label: val[2].label, exponent_sign: val[2].sign, exponent_part: val[2].value) }
 
   decimal: point digits { return val[1] }
 
@@ -59,6 +64,7 @@ end
   require 'lisp/ast/float'
   require 'lisp/ast/exponent'
   require 'lisp/ast/symbol'
+  require 'lisp/ast/string'
 
 ---- inner
   def parse_string(string)

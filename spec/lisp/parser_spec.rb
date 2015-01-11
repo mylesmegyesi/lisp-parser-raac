@@ -290,4 +290,20 @@ RSpec.describe Lisp::Parser do
     end
   end
 
+  describe 'parsing strings' do
+    specify 'parses one or more characters wraped in double quotes' do
+      result = parse_string('"abc"')
+
+      expect(result).to be_a(Lisp::AST::String)
+      expect(result.value).to eq('abc')
+    end
+
+    specify 'strings can include escaped double quotes' do
+      result = parse_string('"abc\"abc\"abc"')
+
+      expect(result).to be_a(Lisp::AST::String)
+      expect(result.value).to eq('abc\"abc\"abc')
+    end
+  end
+
 end
