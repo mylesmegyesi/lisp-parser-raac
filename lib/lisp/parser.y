@@ -1,18 +1,21 @@
 class Lisp::Parser
 rule
   expression:
-      integer
+      boolean
     | float
+    | integer
     | string
     | symbol
 
-  integer:
-      digits { return Lisp::AST::Integer.new(value: val[0]) }
-    | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
+  boolean: BOOLEAN { return Lisp::AST::Boolean.new(value: val[0]) }
 
   float:
       integer decimal { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1]) }
     | integer decimal exponent { return Lisp::AST::Float.new(sign: val[0].sign, integer_part: val[0].value, decimal_part: val[1], exponent_label: val[2].label, exponent_sign: val[2].sign, exponent_part: val[2].value) }
+
+  integer:
+      digits { return Lisp::AST::Integer.new(value: val[0]) }
+    | sign digits { return Lisp::AST::Integer.new(sign: val[0], value: val[1]) }
 
   string: STRING { return Lisp::AST::String.new(value: val[0][1..-2]) }
 
@@ -65,6 +68,7 @@ end
   require 'lisp/ast/exponent'
   require 'lisp/ast/symbol'
   require 'lisp/ast/string'
+  require 'lisp/ast/boolean'
 
 ---- inner
   def parse_string(string)

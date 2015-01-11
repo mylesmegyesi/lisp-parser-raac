@@ -306,4 +306,20 @@ RSpec.describe Lisp::Parser do
     end
   end
 
+  describe 'parsing booleans' do
+    specify 'parses true' do
+      result = parse_string('true')
+
+      expect(result).to be_a(Lisp::AST::Boolean)
+      expect(result.value).to eq('true')
+    end
+
+    specify 'parses false' do
+      result = parse_string('false')
+
+      expect(result).to be_a(Lisp::AST::Boolean)
+      expect(result.value).to eq('false')
+    end
+  end
+
 end
