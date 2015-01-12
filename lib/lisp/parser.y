@@ -8,6 +8,7 @@ rule
     | list
     | string
     | symbol
+    | vector
 
   boolean: BOOLEAN { return Lisp::AST::Boolean.new(value: val[0]) }
 
@@ -32,6 +33,10 @@ rule
     | leading_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
     | digit_prefix non_digit_trailing_symbol_character { return Lisp::AST::Symbol.new(value: val.join('')) }
     | digit_prefix non_digit_trailing_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
+
+  vector:
+      LBRACKET RBRACKET { return Lisp::AST::Vector.new(values: []) }
+    | LBRACKET separated_expressions RBRACKET { return Lisp::AST::Vector.new(values: val[1]) }
 
   # fragments
 
@@ -88,6 +93,7 @@ end
   require 'lisp/ast/list'
   require 'lisp/ast/string'
   require 'lisp/ast/symbol'
+  require 'lisp/ast/vector'
 
 ---- inner
   def parse_string(string)
