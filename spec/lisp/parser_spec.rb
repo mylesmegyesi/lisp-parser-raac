@@ -340,4 +340,246 @@ RSpec.describe Lisp::Parser do
       end
     end
   end
+
+  describe 'parsing lists' do
+    specify 'a list is group of expressions wraped in parentheses' do
+      expression = '(1 2 3)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(3)
+      expect(values[0]).to be_a(Lisp::AST::Integer)
+      expect(values[0].value).to eq('1')
+      expect(values[1]).to be_a(Lisp::AST::Integer)
+      expect(values[1].value).to eq('2')
+      expect(values[2]).to be_a(Lisp::AST::Integer)
+      expect(values[2].value).to eq('3')
+    end
+
+    specify 'a list can contain a float' do
+      expression = '(1.0)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Float)
+      expect(values[0].integer_part).to eq('1')
+      expect(values[0].decimal_part).to eq('0')
+    end
+
+    specify 'a list can contain an integer' do
+      expression = '(1)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Integer)
+      expect(values[0].value).to eq('1')
+    end
+
+    specify 'a list can contain a keyword' do
+      expression = '(:my-key)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Keyword)
+      expect(values[0].value).to eq(':my-key')
+    end
+
+    specify 'a list can contain a string' do
+      expression = '("my string")'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::String)
+      expect(values[0].value).to eq('my string')
+    end
+
+    specify 'a list can contain a symbol' do
+      expression = '(my-symbol)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more spaces between the left parenthesis' do
+      expression = '(   my-symbol)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more newlines between the left parenthesis' do
+      expression = "(\n\nmy-symbol)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more tabs between the left parenthesis' do
+      expression = "(\t\tmy-symbol)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more spaces between the right parenthesis' do
+      expression = '(my-symbol   )'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more newlines between the right parenthesis' do
+      expression = "(my-symbol\n\n)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more tabs between the right parenthesis' do
+      expression = "(my-symbol\t\t)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(1)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+    end
+
+    specify 'there can be one or more spaces between elements' do
+      expression = '(my-symbol   other-symbol)'
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(2)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+      expect(values[1]).to be_a(Lisp::AST::Symbol)
+      expect(values[1].value).to eq('other-symbol')
+    end
+
+    specify 'there can be one or more newlines between elements' do
+      expression = "(my-symbol\n\nother-symbol)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(2)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+      expect(values[1]).to be_a(Lisp::AST::Symbol)
+      expect(values[1].value).to eq('other-symbol')
+    end
+
+    specify 'there can be one or more tabs between elements' do
+      expression = "(my-symbol\t\tother-symbol)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(2)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+      expect(values[1]).to be_a(Lisp::AST::Symbol)
+      expect(values[1].value).to eq('other-symbol')
+    end
+
+    specify 'there can be one or more commas between elements' do
+      expression = "(my-symbol,,,other-symbol)"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(2)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+      expect(values[1]).to be_a(Lisp::AST::Symbol)
+      expect(values[1].value).to eq('other-symbol')
+    end
+
+    specify 'all the whitespace together' do
+      expression = "( \n\t my-symbol ,\n\t\n,other-symbol\n\t abc\n\t )"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(3)
+      expect(values[0]).to be_a(Lisp::AST::Symbol)
+      expect(values[0].value).to eq('my-symbol')
+      expect(values[1]).to be_a(Lisp::AST::Symbol)
+      expect(values[1].value).to eq('other-symbol')
+      expect(values[2]).to be_a(Lisp::AST::Symbol)
+      expect(values[2].value).to eq('abc')
+    end
+
+    specify 'lists can contain lists' do
+      expression = "(1 2 (3 4 (:five :six (:seven))))"
+      result = parse_string(expression)
+
+      expect(result).to be_a(Lisp::AST::List)
+      values = result.values
+      expect(values.size).to eq(3)
+      expect(values[0]).to be_a(Lisp::AST::Integer)
+      expect(values[0].value).to eq('1')
+      expect(values[1]).to be_a(Lisp::AST::Integer)
+      expect(values[1].value).to eq('2')
+      expect(values[2]).to be_a(Lisp::AST::List)
+      values = values[2].values
+      expect(values[0]).to be_a(Lisp::AST::Integer)
+      expect(values[0].value).to eq('3')
+      expect(values[1]).to be_a(Lisp::AST::Integer)
+      expect(values[1].value).to eq('4')
+      expect(values[2]).to be_a(Lisp::AST::List)
+      values = values[2].values
+      expect(values[0]).to be_a(Lisp::AST::Keyword)
+      expect(values[0].value).to eq(':five')
+      expect(values[1]).to be_a(Lisp::AST::Keyword)
+      expect(values[1].value).to eq(':six')
+      expect(values[2]).to be_a(Lisp::AST::List)
+      values = values[2].values
+      expect(values[0]).to be_a(Lisp::AST::Keyword)
+      expect(values[0].value).to eq(':seven')
+    end
+
+    specify 'lists can be empty' do
+      result = parse_string('()')
+
+      expect(result).to be_a(Lisp::AST::List)
+      expect(result.values).to be_empty
+    end
+  end
 end

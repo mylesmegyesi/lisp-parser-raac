@@ -5,6 +5,7 @@ rule
     | float
     | integer
     | keyword
+    | list
     | string
     | symbol
 
@@ -20,6 +21,10 @@ rule
 
   keyword: ':' trailing_symbol_characters { return Lisp::AST::Keyword.new(value: ":#{val[1]}") }
 
+  list:
+      LPAREN RPAREN { return Lisp::AST::List.new(values: []) }
+    | LPAREN separated_expressions RPAREN { return Lisp::AST::List.new(values: val[1]) }
+
   string: STRING { return Lisp::AST::String.new(value: val[0][1..-2]) }
 
   symbol:
@@ -29,6 +34,15 @@ rule
     | digit_prefix non_digit_trailing_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
 
   # fragments
+
+  separated_expressions:
+      expression { return [val[0]] }
+    | expression expression_separators separated_expressions { return val[2].unshift(val[0]) }
+
+  expression_separators: expression_separator | expression_separator expression_separators
+  expression_separator: whitespace | ','
+
+  whitespace: WHITESPACE
 
   digit_prefix: sign | point
 
@@ -71,6 +85,7 @@ end
   require 'lisp/ast/float'
   require 'lisp/ast/integer'
   require 'lisp/ast/keyword'
+  require 'lisp/ast/list'
   require 'lisp/ast/string'
   require 'lisp/ast/symbol'
 
