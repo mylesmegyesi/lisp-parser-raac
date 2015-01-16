@@ -1,6 +1,22 @@
 class Lisp::Parser
+start forms
+
 rule
-  expression:
+
+  forms:
+      whitespaces { return [] }
+    | form { return [val[0]] }
+    | whitespaces form { return [val[1]] }
+    | whitespaces form whitespaces { return [val[1]] }
+    | whitespaces form whitespaces more_forms { return val[3].unshift(val[1]) }
+    | form whitespaces more_forms { return val[2].unshift(val[0]) }
+
+  more_forms:
+      form { return [val[0]] }
+    | form whitespaces { return [val[0]] }
+    | form whitespaces more_forms { return val[2].unshift(val[0]) }
+
+  form:
       boolean
     | float
     | integer
@@ -24,7 +40,7 @@ rule
 
   list:
       LPAREN RPAREN { return Lisp::AST::List.new(values: []) }
-    | LPAREN separated_expressions RPAREN { return Lisp::AST::List.new(values: val[1]) }
+    | LPAREN separated_forms RPAREN { return Lisp::AST::List.new(values: val[1]) }
 
   string: STRING { return Lisp::AST::String.new(value: val[0][1..-2]) }
 
@@ -36,16 +52,20 @@ rule
 
   vector:
       LBRACKET RBRACKET { return Lisp::AST::Vector.new(values: []) }
-    | LBRACKET separated_expressions RBRACKET { return Lisp::AST::Vector.new(values: val[1]) }
+    | LBRACKET separated_forms RBRACKET { return Lisp::AST::Vector.new(values: val[1]) }
 
   # fragments
 
-  separated_expressions:
-      expression { return [val[0]] }
-    | expression expression_separators separated_expressions { return val[2].unshift(val[0]) }
+  separated_forms:
+      form { return [val[0]] }
+    | form form_separators separated_forms { return val[2].unshift(val[0]) }
 
-  expression_separators: expression_separator | expression_separator expression_separators
-  expression_separator: whitespace | ','
+  form_separators: form_separator | form_separator form_separators
+  form_separator: whitespace | ','
+
+  whitespaces:
+      whitespace
+    | whitespace whitespaces
 
   whitespace: WHITESPACE
 
@@ -96,6 +116,10 @@ end
   require 'lisp/ast/vector'
 
 ---- inner
+  def self.parse_string(string)
+    self.new.parse_string(string)
+  end
+
   def parse_string(string)
     scan_str(string)
   end
