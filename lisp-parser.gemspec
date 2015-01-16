@@ -5,10 +5,11 @@ Gem::Specification.new do |spec|
   spec.version       = '0.0.1.alpha1'
   spec.authors       = ['Myles Megyesi']
   spec.email         = ['myles.megyesi@gmail.com']
-  spec.summary       = 'Write a short summary. Required.'
-  spec.description   = 'Write a longer description. Optional.'
+  spec.summary       = 'Parse Lisp data structures into an AST.'
+  spec.description   = spec.summary
   spec.license       = 'MIT'
 
+  spec.files         = Dir['lib/**/*.rb']
   spec.require_paths = ['lib']
 
   spec.add_development_dependency 'racc', '1.4.12'

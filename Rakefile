@@ -12,3 +12,5 @@ end
 
 desc 'Generate Lexer and Parser'
 task :generate => [:lexer, :parser]
+
+task :build => :generate
