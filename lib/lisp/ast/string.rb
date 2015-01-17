@@ -7,6 +7,10 @@ module Lisp
         @value = options[:value]
         @options = options
       end
+
+      def to_s
+        "\"#{value}\""
+      end
     end
   end
 end

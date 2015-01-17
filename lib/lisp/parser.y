@@ -47,6 +47,7 @@ rule
   symbol:
       leading_symbol_character { return Lisp::AST::Symbol.new(value: val[0]) }
     | leading_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
+    | digit_prefix { return Lisp::AST::Symbol.new(value: val[0]) }
     | digit_prefix non_digit_trailing_symbol_character { return Lisp::AST::Symbol.new(value: val.join('')) }
     | digit_prefix non_digit_trailing_symbol_character trailing_symbol_characters { return Lisp::AST::Symbol.new(value: val.join('')) }
 

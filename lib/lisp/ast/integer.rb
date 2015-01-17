@@ -10,6 +10,13 @@ module Lisp
         @options = options
       end
 
+      def to_s
+        string = ''
+        string += sign if sign
+        string += value if value
+        string
+      end
+
     end
   end
 end

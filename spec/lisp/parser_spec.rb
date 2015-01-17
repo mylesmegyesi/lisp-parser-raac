@@ -260,6 +260,14 @@ RSpec.describe Lisp::Parser do
             expect(result).to be_a(Lisp::AST::Symbol)
             expect(result.value).to eq(symbol)
           end
+
+          it 'can be by itself' do
+            symbol = number_prefix_character
+            result = parse_first_form(symbol)
+
+            expect(result).to be_a(Lisp::AST::Symbol)
+            expect(result.value).to eq(symbol)
+          end
         end
       end
     end
